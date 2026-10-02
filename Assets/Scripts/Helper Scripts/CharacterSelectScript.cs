@@ -1,170 +1,77 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class CharacterSelectScript : MonoBehaviour {
-
-	public GameObject[] available_Heroes;
-
-	private int currentIndex;
-
-	public Text selectedText;
-	public GameObject starIcon;
-	public Image selectBtn_Image;
-	public Sprite button_Green, button_Blue;
-
-	private bool[] heroes;
-
-	public Text starScoreText;
-
-	void Start () {
-		InitializeCharacters ();
-	}
-	
-	void InitializeCharacters() {
-		
-		currentIndex = GameManager.instance.selected_Index;
-
-		for (int i = 0; i < available_Heroes.Length; i++) {
-			available_Heroes [i].SetActive (false);
-		}
-		available_Heroes [currentIndex].SetActive (true);
-
-		heroes = GameManager.instance.heroes;
-	}
-
-	public void NextHero() {
-		available_Heroes [currentIndex].SetActive (false);
-
-		if (currentIndex + 1 == available_Heroes.Length) {
-			currentIndex = 0;
-
-		} else {
-			currentIndex++;
-		}
-
-		available_Heroes [currentIndex].SetActive (true);
-
-		CheckIfCharacterIsUnlocked ();
-
-	}
-
-	public void PreviousHero() {
-		available_Heroes [currentIndex].SetActive (false);
-
-		if (currentIndex - 1 == -1) {
-			currentIndex = available_Heroes.Length - 1;
-
-		} else {
-			currentIndex--;
-		}
-
-		available_Heroes [currentIndex].SetActive (true);
-
-		CheckIfCharacterIsUnlocked ();
-
-	}
-
-	void CheckIfCharacterIsUnlocked() {
-
-		if (heroes [currentIndex]) {
-			// if the hero is unlocked
-
-			starIcon.SetActive (false);
-
-			if (currentIndex == GameManager.instance.selected_Index) {
-				selectBtn_Image.sprite = button_Green;
-				selectedText.text = "Selected";
-			} else {
-				selectBtn_Image.sprite = button_Blue;
-				selectedText.text = "Select?";
-			}
-
-		} else {
-			// if the hero is LOCKED
-			selectBtn_Image.sprite = button_Blue;
-			starIcon.SetActive (true);
-			selectedText.text = "1000";
-		}
-	}
-
-	public void SelectHero() {
-		if (!heroes [currentIndex]) {
-			// IF THE HERO IS NOT UNLOCKED - MEANING HE IS LOCKED
-
-			if (currentIndex != GameManager.instance.selected_Index) {
-				// UNLOCK HERO IF YOU HAVE ENOUGH STAR COUINS
-
-				if (GameManager.instance.starScore >= 1000) {
-					GameManager.instance.starScore -= 1000;
-
-					selectBtn_Image.sprite = button_Green;
-					selectedText.text = "Selected";
-					starIcon.SetActive (false);
-
-					heroes [currentIndex] = true;
-
-					starScoreText.text = GameManager.instance.starScore.ToString ();
-
-					GameManager.instance.selected_Index = currentIndex;
-					GameManager.instance.heroes = heroes;
-
-					GameManager.instance.SaveGameData ();
-
-				} else {
-					print ("NOT ENOUGH STAR POINTS TO UNLOCK THE PLAYER");
-				}
-			}
-
-		} else {
-
-			selectBtn_Image.sprite = button_Green;
-			selectedText.text = "Selected";
-			GameManager.instance.selected_Index = currentIndex;
-
-			GameManager.instance.SaveGameData ();
-		}
-	}
-
-} // class
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+public sealed class CharacterSelectScript : MonoBehaviour
+{
+    // Existing serialized references are retained for scene compatibility.
+    public GameObject[] available_Heroes;
+    public Text selectedText;
+    public GameObject starIcon;
+    public Image selectBtn_Image;
+    public Sprite button_Green, button_Blue;
+    public Text starScoreText;
+
+    public event Action CharacterChanged;
+    public int CurrentIndex { get; private set; }
+
+    private void Start()
+    {
+        CurrentIndex = GameManager.EnsureInstance().selected_Index;
+        Refresh();
+    }
+
+    public void NextHero() { Browse(1); }
+    public void PreviousHero() { Browse(-1); }
+
+    private void Browse(int direction)
+    {
+        CurrentIndex = (CurrentIndex + direction + RunnerRules.HeroCount) % RunnerRules.HeroCount;
+        Refresh();
+    }
+
+    public void ShowSelectedHero()
+    {
+        CurrentIndex = GameManager.EnsureInstance().selected_Index;
+        Refresh();
+    }
+
+    public void Refresh()
+    {
+        GameManager manager = GameManager.EnsureInstance();
+        CurrentIndex = Mathf.Clamp(CurrentIndex, 0, RunnerRules.HeroCount - 1);
+        if (available_Heroes != null)
+            for (int i = 0; i < available_Heroes.Length; i++)
+                if (available_Heroes[i] != null) available_Heroes[i].SetActive(i == CurrentIndex);
+
+        bool unlocked = manager.heroes[CurrentIndex];
+        bool selected = manager.selected_Index == CurrentIndex;
+        if (starIcon != null) starIcon.SetActive(!unlocked);
+        if (selectBtn_Image != null) selectBtn_Image.sprite = selected ? button_Green : button_Blue;
+        if (selectedText != null)
+            selectedText.text = !unlocked ? RunnerRules.HeroPrice.ToString() : selected ? "Selected" : "Select";
+        if (starScoreText != null) starScoreText.text = manager.starScore.ToString();
+        if (CharacterChanged != null) CharacterChanged();
+    }
+
+    public HeroSelectionResult TrySelectHero()
+    {
+        HeroSelectionResult result = GameManager.EnsureInstance().SelectHero(CurrentIndex);
+        Refresh();
+        if (result == HeroSelectionResult.Purchased && SoundManager.instance != null)
+            SoundManager.instance.PlayBuySound();
+        return result;
+    }
+
+    public void SelectHero()
+    {
+        HeroSelectionResult result = TrySelectHero();
+        if (RunnerUI.instance == null) return;
+        if (result == HeroSelectionResult.NotEnoughStars)
+            RunnerUI.instance.ShowToast("Need " + (RunnerRules.HeroPrice - GameManager.instance.starScore) + " more stars");
+        else if (result == HeroSelectionResult.Purchased)
+            RunnerUI.instance.ShowToast("Runner unlocked. Let's go!");
+        else if (result != HeroSelectionResult.InvalidHero)
+            RunnerUI.instance.ShowToast("Runner selected");
+    }
+}

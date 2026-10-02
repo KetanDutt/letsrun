@@ -1,87 +1,46 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 using System;
-using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
 
+/// <summary>The versioned, JSON-friendly player profile. Contains no Unity dependencies.</summary>
 [Serializable]
-public class GameData {
+public sealed class GameData
+{
+    public const int CurrentVersion = 1;
 
-	private int star_Score;
-	private int score_Count;
+    public int version = CurrentVersion;
+    public int stars;
+    public int bestScore;
+    public int selectedHero;
+    public bool[] unlockedHeroes = new bool[RunnerRules.HeroCount];
+    public bool musicEnabled = true;
+    public bool sfxEnabled = true;
+    public bool reducedMotion;
+    public bool tutorialSeen;
+    public int totalRuns;
+    public int lifetimeStars;
 
-	private bool[] heroes;
+    public GameData()
+    {
+        unlockedHeroes[0] = true;
+    }
 
-	private int selected_Index;
+    /// <summary>Repair invalid values without granting currency or locking the starter hero.</summary>
+    public void Normalize()
+    {
+        stars = Math.Max(0, stars);
+        bestScore = Math.Max(0, bestScore);
+        totalRuns = Math.Max(0, totalRuns);
+        lifetimeStars = Math.Max(0, lifetimeStars);
 
-	public int StarScore {
-		get {
-			return star_Score;
-		}
-		set {
-			star_Score = value;
-		}
-	}
+        if (unlockedHeroes == null || unlockedHeroes.Length != RunnerRules.HeroCount)
+        {
+            var repaired = new bool[RunnerRules.HeroCount];
+            if (unlockedHeroes != null)
+                Array.Copy(unlockedHeroes, repaired, Math.Min(unlockedHeroes.Length, repaired.Length));
+            unlockedHeroes = repaired;
+        }
 
-	public int ScoreCount {
-		get {
-			return score_Count;
-		}
-		set {
-			score_Count = value;
-		}
-	}
-
-	public bool[] Heroes {
-		get { 
-			return heroes; 
-		}
-		set {
-			heroes = value; 
-		}
-	}
-
-	public int SelectedIndex {
-		get {
-			return selected_Index;
-		}
-		set {
-			selected_Index = value;
-		}
-	}
-
-} // class
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        unlockedHeroes[0] = true;
+        if (selectedHero < 0 || selectedHero >= unlockedHeroes.Length || !unlockedHeroes[selectedHero])
+            selectedHero = 0;
+    }
+}

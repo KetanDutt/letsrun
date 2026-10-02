@@ -1,88 +1,38 @@
-﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class ObstacleHolder : MonoBehaviour {
+public sealed class ObstacleHolder : MonoBehaviour
+{
+    public GameObject[] childs;
+    public float limitAxisX;
+    public Vector3 firstPos, secondPos;
 
-	public GameObject[] childs;
+    private void Update()
+    {
+        GameplayController controller = GameplayController.instance;
+        if (controller == null || controller.State != RunState.Running) return;
+        // Pattern coordinates are authored in the camera's local space, but scroll along world X.
+        transform.position += Vector3.left * (controller.moveSpeed * Time.deltaTime);
+        if (transform.localPosition.x <= limitAxisX) gameObject.SetActive(false);
+    }
 
-	public float limitAxisX;
+    private void OnEnable()
+    {
+        if (childs != null)
+            for (int i = 0; i < childs.Length; i++)
+                if (childs[i] != null) childs[i].SetActive(true);
+        transform.localPosition = Random.value <= 0.5f ? firstPos : secondPos;
+        // Re-enable/reset all children on reuse, including collected pickups and animated spikes.
+        if (childs == null) return;
+        for (int i = 0; i < childs.Length; i++)
+        {
+            if (childs[i] == null) continue;
+            Animator animator = childs[i].GetComponent<Animator>();
+            if (animator != null) { animator.Rebind(); animator.Update(0f); }
+        }
+    }
 
-	public Vector3 
-		firstPos,
-		secondPos;
-	
-	// Update is called once per frame
-	void Update () {
-
-		transform.position += new Vector3 (-GameplayController.instance.moveSpeed * Time.deltaTime, 0f, 0f);
-
-		if (transform.localPosition.x <= limitAxisX) {
-			
-			GameplayController.instance.obstacles_Is_Active = false;
-			gameObject.SetActive(false);
-
-		}
-
-	}
-
-	void OnEnable() { 
-		for (int i = 0; i < childs.Length; i++) {
-			childs [i].SetActive (true);
-		}
-
-		if (Random.value <= 0.5f) {
-			transform.localPosition = firstPos;
-
-		} else {
-			transform.localPosition = secondPos;
-		}
-
-	}
-
-} // class
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    private void OnDisable()
+    {
+        if (GameplayController.instance != null) GameplayController.instance.PatternFinished();
+    }
+}

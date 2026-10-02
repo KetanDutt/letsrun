@@ -1,0 +1,54 @@
+# Unity-generated working data
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+/[Aa]rtifacts/
+/MemoryCaptures/
+/Recordings/
+
+# Generated IDE projects and per-user state (the real Tools test project is source)
+/*.csproj
+/*.sln
+*.suo
+*.user
+*.userprefs
+*.pidb
+*.booproj
+/.vs/
+/.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+bin/
+obj/
+
+# Build outputs and local signing material
+*.apk
+*.aab
+*.unitypackage
+*.keystore
+*.jks
+*.p12
+*.mobileprovision
+.env
+.env.*
+
+# OS/editor debris and local profiles
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.tmp
+*.bak
+*.log
+profile.json*
+GameData.dat
+
+# Tool caches
+node_modules/
+__pycache__/
+.pytest_cache/
+.venv/

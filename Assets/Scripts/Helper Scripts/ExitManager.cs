@@ -1,19 +1,17 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
-public class ExitManager : MonoBehaviour
+/// <summary>Android Back/Escape closes menu dialogs before exiting; gameplay owns its pause key.</summary>
+public sealed class ExitManager : MonoBehaviour
 {
-    // Update is called once per frame
-    void Update()
+    private MainMenuController menu;
+
+    private void Start() { menu = FindObjectOfType<MainMenuController>(); }
+
+    private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            if (SceneManager.GetActiveScene().buildIndex == 0)
-                Application.Quit();
-            else
-                SceneManager.LoadScene(0);
-        }
+        if (!Input.GetKeyDown(KeyCode.Escape) || SceneNavigator.IsLoading || GameplayController.instance != null) return;
+        if (menu != null && menu.HandleBack()) return;
+        GameManager.EnsureInstance().FlushSave();
+        Application.Quit();
     }
 }

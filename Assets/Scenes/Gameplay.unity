@@ -3969,6 +3969,8 @@ MonoBehaviour:
   final_Score_Text: {fileID: 2117239298}
   best_Score_Text: {fileID: 1127241753}
   final_Star_Score_Text: {fileID: 458503241}
+  score_Text: {fileID: 2117239298}
+  star_Score_Text: {fileID: 2087691006}
 --- !u!4 &851169754
 Transform:
   m_ObjectHideFlags: 0
@@ -10053,6 +10055,9 @@ MonoBehaviour:
   die_Clip: {fileID: 8300000, guid: f7d1b779877e27d4388742c2164da264, type: 3}
   coin_Clip: {fileID: 8300000, guid: 0ef94ac5b7a2e454fbc4c7f3bb133766, type: 3}
   game_Over_Clip: {fileID: 8300000, guid: b440e9d67c31e854ab5030d02f40ff9f, type: 3}
+  ui_Click: {fileID: 8300000, guid: 3c3a6e9fcacfde144bd65faed555e34b, type: 3}
+  purchase_Clip: {fileID: 8300000, guid: 9382d7596fc19e1448810b8c74d1fe36, type: 3}
+  crash_Clip: {fileID: 8300000, guid: a5db3a44e755ec148a2268047199743f, type: 3}
 --- !u!82 &2087138164
 AudioSource:
   m_ObjectHideFlags: 0
