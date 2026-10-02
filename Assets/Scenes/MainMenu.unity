@@ -1281,11 +1281,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f807e69935d7443aa2befa6311593ee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  starScore: 0
-  score_Count: 0
-  selected_Index: 0
-  heroes: 
-  playSound: 1
 --- !u!4 &610591038
 Transform:
   m_ObjectHideFlags: 0
@@ -2712,6 +2707,9 @@ MonoBehaviour:
   music_Img: {fileID: 567128336}
   music_Off: {fileID: 21300000, guid: c33642f356fc1e448a6fc944c12ecf8d, type: 3}
   music_On: {fileID: 21300000, guid: a42fc888cbcf54b4eb53b60bc343a1ba, type: 3}
+  menuMusic: {fileID: 8300000, guid: 9db067b106ef67b458fde3b5bd71283e, type: 3}
+  uiClick: {fileID: 8300000, guid: 3c3a6e9fcacfde144bd65faed555e34b, type: 3}
+  purchaseSound: {fileID: 8300000, guid: 9382d7596fc19e1448810b8c74d1fe36, type: 3}
 --- !u!4 &1404389538
 Transform:
   m_ObjectHideFlags: 0
